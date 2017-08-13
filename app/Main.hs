@@ -9,6 +9,7 @@
 import           Control.Applicative
 import           Control.Arrow
 import           Control.Monad
+import           Control.Monad.Trans (lift)
 import           Data.Char
 import qualified Data.HashMap.Strict as HM
 import           Data.Int
@@ -23,6 +24,7 @@ import qualified Network.HTTP.Client as HTTP
 import           Network.HTTP.Client.Internal
 import qualified Network.HTTP.Client.TLS as TLS
 import           Network.URI
+import qualified Graphics.Rendering.Cairo as C
 import qualified SDL as SDL
 import qualified SDL.Cairo as Cairo
 import qualified SDL.Cairo.Canvas as Canvas
@@ -385,7 +387,7 @@ textToBoxes ls0 events style maxWidth t = do
          , TextBox
              events
              (Text
-              { textXY = V2 (lsX ls') (lsY ls' + Canvas.fontExtentsHeight fe)
+              { textXY = V2 (lsX ls') (lsY ls' + C.fontExtentsHeight fe)
               , textWH = wh
               , textColor = color
               , textWeight = weight
@@ -415,7 +417,7 @@ textToBoxes ls0 events style maxWidth t = do
       Measuring
         (do Canvas.textFont (Canvas.Font defaultFontFace fontSize bold italic)
             Canvas.textSize (T.unpack w))
-    extents = Measuring Canvas.fontExtents
+    extents = Measuring $ lift C.fontExtents
 
 --------------------------------------------------------------------------------
 -- SDL rendering to the canvas
@@ -462,7 +464,8 @@ rerender ev = do
                     (case textStyle text of
                        ItalicStyle -> True
                        NormalStyle -> False))
-               Canvas.textBaseline (T.unpack (textText text)) (textXY text))
+               _ <- Canvas.text (T.unpack (textText text)) (textXY text)
+               pure ())
         boxes
       pure boxes
   SDL.copy (evRenderer ev) (evTexture ev) Nothing Nothing

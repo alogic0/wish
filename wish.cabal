@@ -20,7 +20,7 @@ executable wish
   build-depends:       base
                      , linear
                      , sdl2
-                     , sdl2-cairo
+                     , sdl2-cairo >=0.1.1.0
                      , http-client
                      , http-types
                      , html-conduit
